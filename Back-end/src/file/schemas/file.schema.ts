@@ -1,17 +1,23 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import mongoose, { Document } from 'mongoose';
 
-@Schema({
-  timestamps: true,
-})
+@Schema({ timestamps: true })
 export class File {
-  @Prop({ unique: [true, 'Duplicate userid entered'] })
+  @Prop({ required: true })
   fileUserId: string;
 
-  @Prop()
-  fileInfor: string;
+  @Prop({ required: true })
+  originalName: string;
 
-  @Prop()
+  @Prop({ required: true })
+  mimeType: string;
+
+  @Prop({ required: true })
+  fileSize: string;
+
+  @Prop({ required: true })
   fileBuffer: string;
 }
 
+export type FileDocument = File & Document;
 export const FileSchema = SchemaFactory.createForClass(File);

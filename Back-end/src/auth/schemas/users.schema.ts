@@ -14,10 +14,10 @@ export class User {
   password: string;
 
   @Prop()
-  keySecret: String;
+  iv: Buffer;
 
   @Prop()
-  encryptedText: Buffer;
+  keySecret: Buffer;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

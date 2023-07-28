@@ -5,6 +5,8 @@ import { AuthModule } from './auth/auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { FileModule } from './file/file.module';
+import { TextController } from './text/text.controller';
+import { TextModule } from './text/text.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -14,8 +16,9 @@ import { FileModule } from './file/file.module';
     MongooseModule.forRoot(process.env.DB_URI),
     AuthModule,
     FileModule,
+    TextModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, TextController],
   providers: [AppService],
 })
 export class AppModule {}

@@ -1,14 +1,14 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Search, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from './schemas/users.schema';
 import * as bcrypt from 'bcryptjs';
-import { createCipheriv, createDecipheriv, randomBytes, scrypt } from 'crypto';
-import { promisify } from 'util';
+import { randomBytes } from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { SignUpDto } from './dto/signup.dto';
 import { LogInDto } from './dto/login.dto';
-
+import { encryptUserObject } from 'src/utils/ecryption';
+import { createPCAES } from 'src/utils/ecryption';
 @Injectable()
 export class AuthService {
   constructor(
@@ -16,33 +16,25 @@ export class AuthService {
     private userModel: Model<User>,
     private jwtService: JwtService,
   ) {}
-  async signUp(
-    signUpDto: SignUpDto,
-  ): Promise<{ keySecret: String; encryptedText: Buffer; token: string }> {
+  async signUp(signUpDto: SignUpDto): Promise<{
+    token: string;
+  }> {
     const { name, email, password } = signUpDto;
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const iv = randomBytes(16);
-    const passwordAES = hashedPassword;
-    //EncryptionAE-256-CTR
-    const coffeSalt = randomBytes(4).toString();
-    const key = (await promisify(scrypt)(passwordAES, coffeSalt, 32)) as Buffer;
-    const cipher = createCipheriv('aes-256-ctr', key, iv);
     const keySecret = randomBytes(24).toString();
-    const textToEncrypt = keySecret.toString();
-    const encryptedText = Buffer.concat([
-      cipher.update(textToEncrypt),
-      cipher.final(),
-    ]);
+    console.log(keySecret);
     const user = await this.userModel.create({
       name,
       email,
-      password: hashedPassword,
-      encryptedText: encryptedText,
+      password: '',
       keySecret: keySecret,
     });
+    await encryptUserObject(user, ['keySecret'], user._id, password);
+    const { passwordAES } = await createPCAES(password, user._id);
+    user.password = passwordAES;
+
+    user.save();
     const token = this.jwtService.sign({ id: user._id });
-    return { keySecret, encryptedText, token };
+    return { token };
   }
   async LogIn(LogInDto: LogInDto): Promise<{ token: string }> {
     const { email, password } = LogInDto;

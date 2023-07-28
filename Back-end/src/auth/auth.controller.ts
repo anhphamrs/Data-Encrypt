@@ -15,9 +15,9 @@ import { LogInDto } from './dto/login.dto';
 export class AuthController {
   constructor(private authService: AuthService) {}
   @Post('/signup')
-  signUp(
-    @Body() signUpDto: SignUpDto,
-  ): Promise<{ keySecret: String; encryptedText: Buffer; token: string }> {
+  signUp(@Body() signUpDto: SignUpDto): Promise<{
+    token: string;
+  }> {
     return this.authService.signUp(signUpDto);
   }
 
