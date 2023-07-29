@@ -18,7 +18,7 @@ import { TextModule } from './text/text.module';
     FileModule,
     TextModule,
   ],
-  controllers: [AppController, TextController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
